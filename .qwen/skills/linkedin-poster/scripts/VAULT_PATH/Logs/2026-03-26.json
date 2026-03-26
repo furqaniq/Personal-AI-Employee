@@ -1,0 +1,9 @@
+[
+  {
+    "timestamp": "2026-03-26T16:56:24.390930",
+    "action_type": "posts_processed",
+    "details": "Count: 0",
+    "status": "success",
+    "component": "linkedin_poster"
+  }
+]

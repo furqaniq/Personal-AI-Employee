@@ -1,0 +1,51 @@
+[
+  {
+    "timestamp": "2026-03-26T16:56:07.059345",
+    "action_type": "post_failed",
+    "details": "Failed to post",
+    "status": "error",
+    "component": "linkedin_poster_workflow"
+  },
+  {
+    "timestamp": "2026-03-26T16:58:24.288085",
+    "action_type": "post_failed",
+    "details": "Failed to post",
+    "status": "error",
+    "component": "linkedin_poster_workflow"
+  },
+  {
+    "timestamp": "2026-03-26T17:10:25.875803",
+    "action_type": "post_failed",
+    "details": "Failed to post",
+    "status": "error",
+    "component": "linkedin_poster_workflow"
+  },
+  {
+    "timestamp": "2026-03-26T17:20:52.544469",
+    "action_type": "post_published",
+    "details": "Success",
+    "status": "success",
+    "component": "linkedin_poster_workflow"
+  },
+  {
+    "timestamp": "2026-03-26T17:28:40.970826",
+    "action_type": "post_unverified",
+    "details": "Script success but user could not verify",
+    "status": "warning",
+    "component": "linkedin_poster_workflow"
+  },
+  {
+    "timestamp": "2026-03-26T17:37:35.180673",
+    "action_type": "post_failed",
+    "details": "Failed to post",
+    "status": "error",
+    "component": "linkedin_poster_workflow"
+  },
+  {
+    "timestamp": "2026-03-26T17:43:19.814427",
+    "action_type": "post_published",
+    "details": "Success - verified by user",
+    "status": "success",
+    "component": "linkedin_poster_workflow"
+  }
+]

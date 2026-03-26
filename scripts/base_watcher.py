@@ -1,186 +1,372 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 r"""
-Base Watcher - Abstract template for all AI Employee watchers.
+Base Watcher - Abstract base class for all AI Employee watchers.
 
-All watchers inherit from this base class and implement:
-- check_for_updates(): Return list of new items to process
-- create_action_file(item): Create .md file in Needs_Action folder
+This module provides the common interface and functionality for:
+- Gmail Watcher
+- LinkedIn Watcher
+- File System Watcher
+- Future watchers (WhatsApp, Bank, etc.)
 
-Usage:
-    class MyWatcher(BaseWatcher):
-        def check_for_updates(self) -> list:
-            # Your implementation
-            return [item1, item2]
-        
-        def create_action_file(self, item) -> Path:
-            # Your implementation
-            return filepath
+All watchers inherit from this base class to ensure consistent behavior.
 """
 
 import time
 import logging
+import re
 from pathlib import Path
-from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Optional
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+from abc import ABC, abstractmethod
+from typing import List, Dict, Any, Optional
 
 
 class BaseWatcher(ABC):
-    """Abstract base class for all watchers."""
+    """
+    Abstract base class for all watchers.
     
+    Provides common functionality:
+    - Vault path management
+    - Needs_Action folder creation
+    - Logging setup
+    - Filename sanitization
+    - Action file creation pattern
+    """
+
     def __init__(self, vault_path: str, check_interval: int = 60):
         """
-        Initialize the watcher.
+        Initialize the base watcher.
         
         Args:
             vault_path: Path to the Obsidian vault
             check_interval: Seconds between checks (default: 60)
         """
         self.vault_path = Path(vault_path)
-        self.needs_action = self.vault_path / 'Needs_Action'
         self.check_interval = check_interval
-        self.logger = logging.getLogger(self.__class__.__name__)
-        self.processed_ids: set = set()
         
-        # Ensure Needs_Action folder exists
-        self.needs_action.mkdir(parents=True, exist_ok=True)
-    
+        # Vault folders
+        self.needs_action = self.vault_path / 'Needs_Action'
+        self.done = self.vault_path / 'Done'
+        self.pending_approval = self.vault_path / 'Pending_Approval'
+        self.approved = self.vault_path / 'Approved'
+        self.logs = self.vault_path / 'Logs'
+        
+        # Ensure all folders exist
+        for folder in [self.needs_action, self.done, 
+                       self.pending_approval, self.approved, self.logs]:
+            folder.mkdir(parents=True, exist_ok=True)
+        
+        # Setup logging
+        self.logger = logging.getLogger(self.__class__.__name__)
+        
+        # Track processed items (to be managed by subclasses)
+        self.processed_items: set = set()
+
     @abstractmethod
-    def check_for_updates(self) -> list:
+    def check_for_updates(self) -> List[Any]:
         """
         Check for new items to process.
         
         Returns:
-            List of new items that need action
+            List of new items (emails, notifications, files, etc.)
         """
         pass
-    
+
     @abstractmethod
-    def create_action_file(self, item) -> Path:
+    def create_action_file(self, item: Any) -> Path:
         """
-        Create a markdown action file for an item.
+        Create an action file for the item.
         
         Args:
             item: The item to process
             
         Returns:
-            Path to the created file
+            Path to the created action file
         """
         pass
-    
+
     def sanitize_filename(self, name: str) -> str:
-        """Sanitize string for use in filenames."""
-        # Remove or replace invalid characters
+        """
+        Sanitize a string for use in filenames.
+        
+        Args:
+            name: The string to sanitize
+            
+        Returns:
+            Sanitized filename-safe string
+        """
+        # Remove invalid characters
         invalid_chars = '<>:"/\\|?*'
         for char in invalid_chars:
             name = name.replace(char, '_')
-        return name.strip()
-    
+        
+        # Remove leading/trailing spaces and dots
+        name = name.strip().strip('.')
+        
+        # Limit length
+        if len(name) > 100:
+            name = name[:100]
+        
+        return name
+
+    def is_file_ready(self, file_path: Path) -> bool:
+        """
+        Check if a file is fully written (not being copied).
+        
+        Args:
+            file_path: Path to the file
+            
+        Returns:
+            True if file is ready to read
+        """
+        try:
+            with open(file_path, 'rb') as f:
+                pass
+            return True
+        except (IOError, PermissionError):
+            return False
+
     def run(self):
-        """Main run loop - continuously checks for updates."""
-        self.logger.info(f'Starting {self.__class__.__name__}')
+        """
+        Main run loop for the watcher.
+        
+        This method:
+        1. Logs startup information
+        2. Enters infinite loop
+        3. Checks for updates at intervals
+        4. Creates action files for new items
+        5. Handles errors gracefully
+        """
+        self.logger.info('=' * 60)
+        self.logger.info(f'{self.__class__.__name__} - Silver Tier')
+        self.logger.info('=' * 60)
         self.logger.info(f'Vault path: {self.vault_path}')
         self.logger.info(f'Check interval: {self.check_interval}s')
-        
+        self.logger.info('Press Ctrl+C to stop')
+        self.logger.info('=' * 60)
+
         try:
             while True:
-                try:
-                    items = self.check_for_updates()
-                    if items:
-                        self.logger.info(f'Found {len(items)} new item(s)')
-                        for item in items:
-                            try:
-                                filepath = self.create_action_file(item)
-                                self.logger.info(f'Created action file: {filepath.name}')
-                            except Exception as e:
-                                self.logger.error(f'Error creating action file: {e}')
-                except Exception as e:
-                    self.logger.error(f'Error in check loop: {e}')
+                items = self.check_for_updates()
                 
+                for item in items:
+                    self.create_action_file(item)
+                
+                # Wait for next check
                 time.sleep(self.check_interval)
+                
         except KeyboardInterrupt:
             self.logger.info(f'{self.__class__.__name__} stopped by user')
         except Exception as e:
             self.logger.error(f'Fatal error: {e}')
             raise
 
+    def log_activity(self, action_type: str, details: str, status: str = 'info'):
+        """
+        Log an activity to the logs folder.
+        
+        Args:
+            action_type: Type of action (email, linkedin, file, etc.)
+            details: Details of the action
+            status: Status (info, success, warning, error)
+        """
+        today = datetime.now().strftime('%Y-%m-%d')
+        log_file = self.logs / f'{today}.json'
+        
+        import json
+        
+        # Load existing logs
+        if log_file.exists():
+            try:
+                logs = json.loads(log_file.read_text(encoding='utf-8'))
+            except:
+                logs = []
+        else:
+            logs = []
+        
+        # Add new log entry
+        logs.append({
+            'timestamp': datetime.now().isoformat(),
+            'action_type': action_type,
+            'details': details,
+            'status': status,
+            'watcher': self.__class__.__name__
+        })
+        
+        # Save logs (keep last 1000 entries)
+        logs = logs[-1000:]
+        log_file.write_text(json.dumps(logs, indent=2), encoding='utf-8')
 
-class SimpleWatcher(BaseWatcher):
-    """
-    A simple concrete implementation for testing.
-    Watches a drop folder for new files.
-    """
-    
-    def __init__(self, vault_path: str, drop_folder: Optional[str] = None, check_interval: int = 30):
-        super().__init__(vault_path, check_interval)
-        self.drop_folder = Path(drop_folder) if drop_folder else self.vault_path / 'Inbox'
-        self.drop_folder.mkdir(parents=True, exist_ok=True)
-    
-    def check_for_updates(self) -> list:
-        """Check drop folder for new files."""
+    def get_pending_items(self) -> List[Path]:
+        """
+        Get list of pending action files.
+        
+        Returns:
+            List of Path objects for pending files
+        """
         items = []
-        for file_path in self.drop_folder.iterdir():
-            if file_path.is_file() and file_path.suffix not in ['.md']:
-                file_id = f"{file_path.stem}_{int(file_path.stat().st_mtime)}"
-                if file_id not in self.processed_ids:
+        if self.needs_action.exists():
+            for file_path in self.needs_action.iterdir():
+                if file_path.is_file() and file_path.suffix == '.md':
                     items.append(file_path)
-                    self.processed_ids.add(file_id)
         return items
-    
-    def create_action_file(self, file_path: Path) -> Path:
-        """Create action file for dropped file."""
+
+    def get_approved_items(self) -> List[Path]:
+        """
+        Get list of approved action files.
+        
+        Returns:
+            List of Path objects for approved files
+        """
+        items = []
+        if self.approved.exists():
+            for file_path in self.approved.iterdir():
+                if file_path.is_file() and file_path.suffix == '.md':
+                    items.append(file_path)
+        return items
+
+    def move_to_done(self, source: Path) -> Path:
+        """
+        Move a file to the Done folder.
+        
+        Args:
+            source: Path to the source file
+            
+        Returns:
+            Path to the destination file
+        """
+        if not source.exists():
+            raise FileNotFoundError(f'Source file not found: {source}')
+        
+        dest = self.done / source.name
+        
+        # Handle duplicate names
+        if dest.exists():
+            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+            dest = self.done / f'{source.stem}_{timestamp}{source.suffix}'
+        
+        source.rename(dest)
+        self.logger.info(f'Moved to Done: {dest.name}')
+        return dest
+
+    def create_approval_request(self, action_type: str, details: Dict[str, Any], 
+                                reason: str = None) -> Path:
+        """
+        Create an approval request file.
+        
+        Args:
+            action_type: Type of action (send_email, payment, etc.)
+            details: Dictionary of action details
+            reason: Reason approval is needed
+            
+        Returns:
+            Path to created approval file
+        """
         timestamp = datetime.now().isoformat()
-        file_id = self.sanitize_filename(f"{file_path.stem}_{int(file_path.stat().st_mtime)}")
+        file_id = f"{action_type.upper()}_{int(datetime.now().timestamp())}"
+        
+        # Default reason if not provided
+        if not reason:
+            reason = "Action requires human review before execution"
+        
+        # Build details section
+        details_text = '\n'.join([f'**{k.replace("_", " ").title()}:** {v}' 
+                                   for k, v in details.items()])
         
         content = f"""---
-type: file_drop
-original_name: {file_path.name}
-size: {file_path.stat().st_size}
-received: {timestamp}
+type: approval_request
+action: {action_type}
+created: {timestamp}
 status: pending
+reason: {reason}
 ---
 
-# File Drop for Processing
+# Approval Required
 
-**Original File:** `{file_path.name}`
-**Size:** {file_path.stat().st_size} bytes
-**Received:** {timestamp}
+**Action:** {action_type.replace('_', ' ').title()}  
+**Created:** {timestamp}
 
-## Content
+## Details
 
-File is ready for AI processing.
+{details_text}
 
-## Suggested Actions
+## Why Approval is Needed
 
-- [ ] Review file content
-- [ ] Process as needed
-- [ ] Move to /Done when complete
+{reason}
+
+## To Approve
+
+Move this file to `/Approved` folder.
+
+## To Reject
+
+Move this file to `/Rejected` folder with reason.
+
+---
+*This file was created by {self.__class__.__name__} for human-in-the-loop approval*
 """
         
-        filepath = self.needs_action / f'FILE_{file_id}.md'
-        filepath.write_text(content)
+        filepath = self.pending_approval / f'{file_id}.md'
+        filepath.write_text(content, encoding='utf-8')
+        
+        self.logger.info(f'Approval request created: {filepath.name}')
         return filepath
 
 
-if __name__ == '__main__':
-    import sys
+# Utility functions for watchers
+
+def extract_email_domain(email: str) -> str:
+    """Extract domain from email address."""
+    if '@' not in email:
+        return ''
+    return email.split('@')[-1].lower()
+
+
+def is_known_contact(email: str, known_domains: List[str] = None) -> bool:
+    """
+    Check if email is from a known contact.
     
-    if len(sys.argv) < 2:
-        print("Usage: python base_watcher.py <vault_path> [drop_folder]")
-        print("\nExample:")
-        print("  python base_watcher.py /path/to/vault")
-        print("  python base_watcher.py /path/to/vault /path/to/drop_folder")
-        sys.exit(1)
+    Args:
+        email: Email address to check
+        known_domains: List of known domains
+        
+    Returns:
+        True if from known contact
+    """
+    if known_domains is None:
+        known_domains = []
     
-    vault_path = sys.argv[1]
-    drop_folder = sys.argv[2] if len(sys.argv) > 2 else None
+    domain = extract_email_domain(email)
+    return any(known.lower() in domain for known in known_domains)
+
+
+def determine_priority(content: str, keywords: Dict[str, str] = None) -> str:
+    """
+    Determine priority based on content keywords.
     
-    watcher = SimpleWatcher(vault_path, drop_folder)
-    watcher.run()
+    Args:
+        content: Text content to analyze
+        keywords: Dictionary of keyword -> priority level
+        
+    Returns:
+        Priority level (high, medium, low)
+    """
+    if keywords is None:
+        keywords = {
+            'urgent': 'high',
+            'asap': 'high',
+            'emergency': 'high',
+            'invoice': 'high',
+            'payment': 'high',
+            'help': 'high',
+            'opportunity': 'medium',
+            'meeting': 'medium',
+        }
+    
+    text = content.lower()
+    
+    for keyword, priority in keywords.items():
+        if keyword in text:
+            return priority
+    
+    return 'medium'

@@ -1,10 +1,180 @@
 {
-  "version": 1,
+  "version": 4,
   "skills": {
     "browsing-with-playwright": {
       "source": "bilalmk/todo_correct",
       "sourceType": "github",
-      "computedHash": "f73daf75e38650c202e61f652a26578db157f8423e8bcf283bcd93b441641461"
+      "computedHash": "f73daf75e38650c202e61f652a26578db157f8423e8bcf283bcd93b441641461",
+      "tier": "bronze",
+      "location": ".qwen/skills/browsing-with-playwright"
+    },
+    "gmail-watcher": {
+      "source": "local",
+      "sourceType": "local",
+      "tier": "silver",
+      "description": "Monitor Gmail for new emails and create action files",
+      "location": ".qwen/skills/gmail-watcher",
+      "scripts": ["scripts/gmail_watcher.py"],
+      "dependencies": ["google-api-python-client", "google-auth-httplib2", "google-auth-oauthlib"],
+      "status": "complete"
+    },
+    "linkedin-watcher": {
+      "source": "local",
+      "sourceType": "local",
+      "tier": "silver",
+      "description": "Monitor LinkedIn for notifications using Playwright",
+      "location": ".qwen/skills/linkedin-watcher",
+      "scripts": ["scripts/linkedin_watcher.py"],
+      "dependencies": ["playwright"],
+      "status": "complete"
+    },
+    "email-mcp": {
+      "source": "local",
+      "sourceType": "local",
+      "tier": "silver",
+      "description": "Send and manage emails via Gmail API with HITL approval",
+      "location": ".qwen/skills/email-mcp",
+      "scripts": ["scripts/email_mcp.py"],
+      "dependencies": ["google-api-python-client", "google-auth-httplib2", "google-auth-oauthlib"],
+      "status": "complete"
+    },
+    "linkedin-poster": {
+      "source": "local",
+      "sourceType": "local",
+      "tier": "silver",
+      "description": "Automatically post business content to LinkedIn to generate sales",
+      "location": ".qwen/skills/linkedin-poster",
+      "scripts": ["scripts/linkedin_poster.py"],
+      "dependencies": ["playwright"],
+      "requirements": [
+        "3. Automatically Post on LinkedIn about business to generate sales"
+      ],
+      "status": "complete"
+    },
+    "plan-creator": {
+      "source": "local",
+      "sourceType": "local",
+      "tier": "silver",
+      "description": "Create structured Plan.md files for complex tasks with Qwen reasoning loop",
+      "location": ".qwen/skills/plan-creator",
+      "scripts": ["scripts/plan_creator.py"],
+      "dependencies": [],
+      "requirements": [
+        "4. Qwen reasoning loop that creates Plan.md files"
+      ],
+      "status": "complete"
+    },
+    "approval-workflow": {
+      "source": "local",
+      "sourceType": "local",
+      "tier": "silver",
+      "description": "Manage human-in-the-loop approval for sensitive actions",
+      "location": ".qwen/skills/approval-workflow",
+      "scripts": ["scripts/approval_workflow.py"],
+      "dependencies": [],
+      "requirements": [
+        "6. Human-in-the-loop approval workflow for sensitive actions"
+      ],
+      "status": "complete"
+    },
+    "task-scheduler": {
+      "source": "local",
+      "sourceType": "local",
+      "tier": "silver",
+      "description": "Windows Task Scheduler integration for automating watchers and scheduled tasks",
+      "location": ".qwen/skills/task-scheduler",
+      "scripts": ["scripts/task_scheduler.py"],
+      "dependencies": [],
+      "requirements": [
+        "7. Basic scheduling via cron or Task Scheduler"
+      ],
+      "status": "complete"
+    },
+    "bronze-file-processor": {
+      "source": "local",
+      "sourceType": "local",
+      "tier": "bronze",
+      "description": "Process files in Obsidian vault Needs_Action folder",
+      "location": "skills/bronze-file-processor",
+      "status": "complete"
     }
+  },
+  "tiers": {
+    "bronze": {
+      "skills": ["browsing-with-playwright", "bronze-file-processor"],
+      "watchers": ["filesystem_watcher"],
+      "mcp_servers": ["playwright-mcp"],
+      "status": "complete",
+      "completed_date": "2026-03-24"
+    },
+    "silver": {
+      "skills": ["gmail-watcher", "linkedin-watcher", "email-mcp", "linkedin-poster", "plan-creator", "approval-workflow", "task-scheduler"],
+      "watchers": ["gmail_watcher", "linkedin_watcher", "filesystem_watcher"],
+      "mcp_servers": ["email-mcp", "playwright-mcp"],
+      "scheduling": ["task-scheduler"],
+      "requirements": {
+        "all_bronze": "complete",
+        "two_or_more_watchers": "complete",
+        "linkedin_posting": "complete",
+        "reasoning_loop_with_plans": "complete",
+        "one_mcp_server": "complete",
+        "hitl_approval_workflow": "complete",
+        "basic_scheduling": "complete"
+      },
+      "status": "complete",
+      "completed_date": "2026-03-25"
+    },
+    "gold": {
+      "skills": [],
+      "watchers": [],
+      "mcp_servers": ["odoo-mcp", "social-media-mcp", "calendar-mcp"],
+      "requirements": {
+        "all_silver": "pending",
+        "odoo_erp_integration": "pending",
+        "facebook_instagram_integration": "pending",
+        "twitter_integration": "pending",
+        "weekly_ceo_briefing": "pending",
+        "error_recovery": "pending",
+        "ralph_wiggum_loop": "pending"
+      },
+      "status": "planned"
+    }
+  },
+  "vault_structure": {
+    "folders": [
+      "Inbox",
+      "Needs_Action",
+      "Plans",
+      "Pending_Approval",
+      "Approved",
+      "Rejected",
+      "Done",
+      "Logs",
+      "Briefings",
+      "Accounting",
+      "Invoices"
+    ],
+    "files": [
+      "Dashboard.md",
+      "Company_Handbook.md",
+      "Business_Goals.md"
+    ]
+  },
+  "scripts_location": {
+    "shared": "scripts/",
+    "per_skill": ".qwen/skills/*/scripts/"
+  },
+  "task_scheduler": {
+    "folder": "AI_Employee",
+    "tasks": [
+      "GmailWatcher",
+      "LinkedInWatcher",
+      "Orchestrator",
+      "FileSystemWatcher",
+      "DailyBriefing"
+    ],
+    "default_trigger": "atlogon",
+    "restart_on_failure": true,
+    "execution_time_limit": "PT24H"
   }
 }
