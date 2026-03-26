@@ -14,6 +14,7 @@ Example:
 
 import os
 import sys
+import subprocess
 import time
 import logging
 from pathlib import Path
@@ -22,18 +23,36 @@ from typing import List, Dict, Optional
 import base64
 from email import message_from_bytes
 
-# Google API imports
+# Google API imports - Auto-install if missing
 try:
     from google.oauth2.credentials import Credentials
-    from google.oauth2 import flow
     from google.auth.transport.requests import Request
     from google_auth_oauthlib.flow import InstalledAppFlow
     from googleapiclient.discovery import build
     from googleapiclient.errors import HttpError
-except ImportError:
-    print("Error: Google API libraries not installed.")
-    print("Run: pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib")
-    sys.exit(1)
+except ImportError as ie:
+    print("=" * 70)
+    print("INSTALLING GMAIL API PACKAGES...")
+    print("=" * 70)
+    print()
+    
+    # Auto-install using python -m pip (works even if pip not in PATH)
+    subprocess.check_call([sys.executable, "-m", "pip", "install", 
+                          "google-api-python-client", 
+                          "google-auth-httplib2", 
+                          "google-auth-oauthlib",
+                          "--quiet"])
+    
+    print()
+    print("✓ Packages installed! Retrying...")
+    print()
+    
+    # Retry imports
+    from google.oauth2.credentials import Credentials
+    from google.auth.transport.requests import Request
+    from google_auth_oauthlib.flow import InstalledAppFlow
+    from googleapiclient.discovery import build
+    from googleapiclient.errors import HttpError
 
 # Import base class
 from base_watcher import BaseWatcher
@@ -55,7 +74,7 @@ class GmailWatcher(BaseWatcher):
     """
     Gmail Watcher using Google Gmail API.
     
-    Monitors Gmail for new, unread, important emails and creates
+    Monitors Gmail for NEW, unread emails and creates
     action files in the Obsidian vault Needs_Action folder.
     """
 
@@ -88,8 +107,8 @@ class GmailWatcher(BaseWatcher):
 
     def _load_processed_ids(self) -> set:
         """Load previously processed message IDs."""
+        import json
         if self.processed_ids_file.exists():
-            import json
             try:
                 data = json.loads(self.processed_ids_file.read_text(encoding='utf-8'))
                 return set(data.get('processed_ids', []))
@@ -149,38 +168,47 @@ class GmailWatcher(BaseWatcher):
 
     def check_for_updates(self) -> List[Dict]:
         """
-        Check for new unread, important emails.
-        
+        Check for ALL unread emails and notify total count.
+        Creates action files only for NEW unread emails.
+
         Returns:
-            List of message dictionaries
+            List of new message dictionaries (not yet processed)
         """
         if not self.service:
             return []
-        
+
         try:
-            # Query: unread + important
+            # Query: ALL unread emails (regardless of age or importance)
             results = self.service.users().messages().list(
                 userId='me',
-                q='is:unread is:important',
-                maxResults=10
+                q='is:unread',
+                maxResults=500
             ).execute()
-            
+
             messages = results.get('messages', [])
-            
-            # Filter out already processed
+            total_unread = len(messages)
+
+            # Filter out already processed emails
             new_messages = []
             for msg in messages:
                 if msg['id'] not in self.processed_ids:
                     new_messages.append(msg)
-            
-            if new_messages:
-                self.logger.info(f'Found {len(new_messages)} new email(s)')
-            
+
+            # Notify user about unread count
+            if total_unread > 0:
+                self.logger.info(f'📬 You have {total_unread} unread email(s) in Gmail')
+                
+                if len(new_messages) > 0:
+                    self.logger.info(f'✨ Found {len(new_messages)} NEW unread email(s) to process')
+                else:
+                    self.logger.info('✓ All unread emails already processed')
+            else:
+                self.logger.info('✓ Inbox is clean - no unread emails')
+
             return new_messages
-            
+
         except HttpError as error:
             self.logger.error(f'Gmail API error: {error}')
-            # Try to re-authenticate on auth errors
             if error.resp.status in [401, 403]:
                 self._authenticate()
             return []
@@ -224,7 +252,7 @@ class GmailWatcher(BaseWatcher):
         timestamp = datetime.now().isoformat()
         
         # Sanitize filename
-        safe_subject = self._sanitize_filename(subject[:50])
+        safe_subject = self.sanitize_filename(subject[:50])
         file_id = f"{safe_subject}_{message['id']}"
         
         # Build action file content

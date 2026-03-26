@@ -1,0 +1,47 @@
+[
+  {
+    "timestamp": "2026-03-27T01:37:14.985585",
+    "action": "email_failed",
+    "details": "To: mr bane <mrbane8@gmail.com>, Error: C:\\Users\\Lenovo\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe: can't open file 'C:\\\\Users\\\\Lenovo\\\\OneDrive\\\\Documents\\\\GitHub\\\\Personal-AI-Employee\\\\scripts\\\\scripts\\\\email_mcp.py': [Errno 2] No such file or directory\n"
+  },
+  {
+    "timestamp": "2026-03-27T01:37:37.426453",
+    "action": "email_failed",
+    "details": "To: mr bane <mrbane8@gmail.com>, Error: C:\\Users\\Lenovo\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe: can't open file 'C:\\\\Users\\\\Lenovo\\\\OneDrive\\\\Documents\\\\GitHub\\\\Personal-AI-Employee\\\\scripts\\\\scripts\\\\email_mcp.py': [Errno 2] No such file or directory\n"
+  },
+  {
+    "timestamp": "2026-03-27T01:38:15.080731",
+    "action": "email_failed",
+    "details": "To: mr bane <mrbane8@gmail.com>, Error: C:\\Users\\Lenovo\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe: can't open file 'C:\\\\Users\\\\Lenovo\\\\OneDrive\\\\Documents\\\\GitHub\\\\Personal-AI-Employee\\\\scripts\\\\scripts\\\\email_mcp.py': [Errno 2] No such file or directory\n"
+  },
+  {
+    "timestamp": "2026-03-27T01:38:37.502819",
+    "action": "email_failed",
+    "details": "To: mr bane <mrbane8@gmail.com>, Error: C:\\Users\\Lenovo\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe: can't open file 'C:\\\\Users\\\\Lenovo\\\\OneDrive\\\\Documents\\\\GitHub\\\\Personal-AI-Employee\\\\scripts\\\\scripts\\\\email_mcp.py': [Errno 2] No such file or directory\n"
+  },
+  {
+    "timestamp": "2026-03-27T01:39:49.235668",
+    "action": "email_failed",
+    "details": "To: mr bane <mrbane8@gmail.com>, Error: 2026-03-27 01:39:47,563 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0\n2026-03-27 01:39:47,567 - EmailMCP - INFO - Gmail API service initialized\n2026-03-27 01:39:49,083 - EmailMCP - INFO - Email sent to mr bane <mrbane8@gmail.com>, message ID: 19d2bdfee35725a0\nTraceback (most recent call last):\n  File \"C:\\Users\\Lenovo\\OneDrive\\Documents\\GitHub\\Personal-AI-Employee\\scripts\\email_mcp.py\", line 204, in main\n    print(f\"\\n\\u2705 Email sent successfully!\")\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Lenovo\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\encodings\\cp1252.py\", line 19, in encode\n    return codecs.charmap_encode(input,self.errors,encoding_table)[0]\n           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nUnicodeEncodeError: 'charmap' codec can't encode character '\\u2705' in position 2: character maps to <undefined>\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\Lenovo\\OneDrive\\Documents\\GitHub\\Personal-AI-Employee\\scripts\\email_mcp.py\", line 214, in <module>\n    main()\n    ~~~~^^\n  File \"C:\\Users\\Lenovo\\OneDrive\\Documents\\GitHub\\Personal-AI-Employee\\scripts\\email_mcp.py\", line 209, in main\n    print(f\"\\n\\u274c Failed to send email: {e}\")\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Lenovo\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\encodings\\cp1252.py\", line 19, in encode\n    return codecs.charmap_encode(input,self.errors,encoding_table)[0]\n           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nUnicodeEncodeError: 'charmap' codec can't encode character '\\u274c' in position 2: character maps to <undefined>\n"
+  },
+  {
+    "timestamp": "2026-03-27T01:40:52.840154",
+    "action": "email_failed",
+    "details": "To: mr bane <mrbane8@gmail.com>, Error: 2026-03-27 01:40:51,200 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0\n2026-03-27 01:40:51,204 - EmailMCP - INFO - Gmail API service initialized\n2026-03-27 01:40:52,689 - EmailMCP - INFO - Email sent to mr bane <mrbane8@gmail.com>, message ID: 19d2be0e7c85e43f\nTraceback (most recent call last):\n  File \"C:\\Users\\Lenovo\\OneDrive\\Documents\\GitHub\\Personal-AI-Employee\\scripts\\email_mcp.py\", line 204, in main\n    print(f\"\\n\\u2705 Email sent successfully!\")\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Lenovo\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\encodings\\cp1252.py\", line 19, in encode\n    return codecs.charmap_encode(input,self.errors,encoding_table)[0]\n           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nUnicodeEncodeError: 'charmap' codec can't encode character '\\u2705' in position 2: character maps to <undefined>\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\Lenovo\\OneDrive\\Documents\\GitHub\\Personal-AI-Employee\\scripts\\email_mcp.py\", line 214, in <module>\n    main()\n    ~~~~^^\n  File \"C:\\Users\\Lenovo\\OneDrive\\Documents\\GitHub\\Personal-AI-Employee\\scripts\\email_mcp.py\", line 209, in main\n    print(f\"\\n\\u274c Failed to send email: {e}\")\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Lenovo\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\encodings\\cp1252.py\", line 19, in encode\n    return codecs.charmap_encode(input,self.errors,encoding_table)[0]\n           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nUnicodeEncodeError: 'charmap' codec can't encode character '\\u274c' in position 2: character maps to <undefined>\n"
+  },
+  {
+    "timestamp": "2026-03-27T01:43:42.263529",
+    "action": "email_sent",
+    "details": "To: mr bane <mrbane8@gmail.com>, Subject: Re: test3"
+  },
+  {
+    "timestamp": "2026-03-27T01:44:46.622513",
+    "action": "email_sent",
+    "details": "To: mr bane <mrbane8@gmail.com>, Subject: Re: test4"
+  },
+  {
+    "timestamp": "2026-03-27T01:47:52.042918",
+    "action": "email_sent",
+    "details": "To: mr bane <mrbane8@gmail.com>, Subject: Re: test4"
+  }
+]
