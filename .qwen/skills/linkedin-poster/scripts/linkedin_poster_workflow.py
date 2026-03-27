@@ -230,7 +230,7 @@ class LinkedInPosterWorkflow:
 
     def step2_generate_post(self, topic: str, content_type: str = None) -> Tuple[Dict, str]:
         """
-        Step 2: Generate post content and save as .md file.
+        Step 2: Generate post content using Qwen Code for unique content.
         
         Args:
             topic: Post topic/theme
@@ -240,10 +240,118 @@ class LinkedInPosterWorkflow:
             Tuple of (post_data, filepath)
         """
         print("=" * 70)
-        print("STEP 2: Generate Post Content")
+        print("STEP 2: Generate Post Content with Qwen Code")
         print("=" * 70)
         print()
         
+        # Try to use Qwen Code for unique content generation
+        print("🤖 Generating unique post content with Qwen Code...")
+        
+        qwen_prompt = f"""Create a professional LinkedIn post about: {topic}
+
+Requirements:
+- Exactly 40-60 words (short and engaging)
+- Professional tone
+- Include 2-3 relevant emojis
+- Include 3-5 relevant hashtags at the end
+- No placeholder text like "[Your link here]"
+- Make it sound authentic and engaging
+
+Format the post as plain text (no markdown)."""
+
+        try:
+            # Run Qwen Code to generate unique content
+            import subprocess
+            import os
+            import shutil
+            
+            # Find qwen executable
+            qwen_path = shutil.which('qwen')
+            if not qwen_path:
+                # Try common locations
+                possible_paths = [
+                    r'C:\Users\Lenovo\AppData\Local\Python\pythoncore-3.14-64\Scripts\qwen.exe',
+                    r'C:\Users\Lenovo\AppData\Local\Programs\Python\Python313\Scripts\qwen.exe',
+                    os.path.expanduser('~/.local/bin/qwen')
+                ]
+                for path in possible_paths:
+                    if os.path.exists(path):
+                        qwen_path = path
+                        break
+            
+            if not qwen_path:
+                raise FileNotFoundError("Qwen executable not found in PATH or common locations")
+            
+            print(f"   Using Qwen: {qwen_path}")
+            
+            # Change to vault directory for Qwen to access context files
+            old_cwd = os.getcwd()
+            os.chdir(str(self.vault_path))
+            
+            result = subprocess.run(
+                [qwen_path, '-p', qwen_prompt],
+                capture_output=True,
+                text=True,
+                timeout=15,  # 15 second timeout for fast generation
+                encoding='utf-8',
+                shell=qwen_path.endswith('.CMD') or qwen_path.endswith('.BAT')  # Use shell for .CMD/.BAT files
+            )
+            
+            # Change back to original directory
+            os.chdir(old_cwd)
+            
+            print(f"   Qwen return code: {result.returncode}")
+            print(f"   Qwen stdout length: {len(result.stdout) if result.stdout else 0}")
+            if result.stderr:
+                print(f"   Qwen stderr: {result.stderr[:200]}")
+            
+            if result.returncode == 0 and result.stdout.strip():
+                # Qwen generated content successfully
+                generated_content = result.stdout.strip()
+                print(f"✅ Qwen generated unique content ({len(generated_content)} chars)")
+                
+                # Extract hashtags from generated content
+                import re
+                hashtags = re.findall(r'#\w+', generated_content)
+                hashtag = hashtags[0].replace('#', '') if hashtags else 'AI'
+                
+                post_content = generated_content
+            else:
+                # Fallback to template
+                print("⚠️  Using template (Qwen unavailable)")
+                print(f"   Qwen output: {result.stdout[:100] if result.stdout else 'No output'}")
+                print(f"   Qwen error: {result.stderr[:100] if result.stderr else 'No error'}")
+                post_content, hashtag = self._generate_template_post(topic, content_type)
+                
+        except subprocess.TimeoutExpired:
+            print("⚠️  Qwen timed out, using template")
+            post_content, hashtag = self._generate_template_post(topic, content_type)
+        except FileNotFoundError:
+            print("⚠️  Qwen Code not found, using template")
+            post_content, hashtag = self._generate_template_post(topic, content_type)
+        except Exception as e:
+            print(f"⚠️  Error with Qwen: {e}, using template")
+            post_content, hashtag = self._generate_template_post(topic, content_type)
+        
+        post_data = {
+            'content': post_content,
+            'content_type': content_type or 'product_update',
+            'hashtag': hashtag,
+            'topic': topic,
+            'created': datetime.now().isoformat()
+        }
+        
+        # Create approval file
+        filepath = self._create_approval_request(post_data)
+        
+        print(f"📝 Post generated and saved to:")
+        print(f"   {filepath}")
+        print()
+        
+        return post_data, filepath
+
+    def _generate_template_post(self, topic: str, content_type: str = None) -> Tuple[str, str]:
+        """Generate post using template (fallback method)."""
         # Auto-detect content type from topic keywords
         if not content_type:
             topic_lower = topic.lower()
@@ -267,26 +375,11 @@ class LinkedInPosterWorkflow:
         post_content = template.format(
             content=topic,
             highlights=highlights,
-            link='[Your link here]',
+            link='Learn more in comments',
             hashtag=hashtag
         )
         
-        post_data = {
-            'content': post_content,
-            'content_type': content_type,
-            'hashtag': hashtag,
-            'topic': topic,
-            'created': datetime.now().isoformat()
-        }
-        
-        # Create approval file
-        filepath = self._create_approval_request(post_data)
-        
-        print(f"📝 Post generated and saved to:")
-        print(f"   {filepath}")
-        print()
-        
-        return post_data, filepath
+        return post_content, hashtag
 
     def _generate_highlights(self, content_type: str) -> str:
         """Generate bullet point highlights."""

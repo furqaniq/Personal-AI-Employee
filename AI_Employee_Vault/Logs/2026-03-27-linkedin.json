@@ -1,0 +1,51 @@
+[
+  {
+    "timestamp": "2026-03-27T21:43:29.971841",
+    "action_type": "post_published",
+    "details": "Success - verified by user",
+    "status": "success",
+    "component": "linkedin_poster_workflow"
+  },
+  {
+    "timestamp": "2026-03-27T21:48:01.384958",
+    "action_type": "post_rejected",
+    "details": "User denied permission",
+    "status": "rejected",
+    "component": "linkedin_poster_workflow"
+  },
+  {
+    "timestamp": "2026-03-27T22:01:58.275639",
+    "action_type": "workflow_error",
+    "details": "BrowserType.launch_persistent_context: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> C:\\Users\\Lenovo\\AppData\\Local\\ms-playwright\\chromium-1208\\chrome-win64\\chrome.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --no-sandbox --disable-blink-features=AutomationControlled --no-sandbox --disable-dev-shm-usage --user-data-dir=C:\\Users\\Lenovo\\OneDrive\\Documents\\GitHub\\Personal-AI-Employee\\AI_Employee_Vault\\.creds\\linkedin_poster_session --remote-debugging-pipe about:blank\n<launched> pid=29360\nCall log:\n  - <launching> C:\\Users\\Lenovo\\AppData\\Local\\ms-playwright\\chromium-1208\\chrome-win64\\chrome.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --no-sandbox --disable-blink-features=AutomationControlled --no-sandbox --disable-dev-shm-usage --user-data-dir=C:\\Users\\Lenovo\\OneDrive\\Documents\\GitHub\\Personal-AI-Employee\\AI_Employee_Vault\\.creds\\linkedin_poster_session --remote-debugging-pipe about:blank\n  - <launched> pid=29360\n  - [pid=29360] <gracefully close start>\n  - [pid=29360] <kill>\n  - [pid=29360] <will force kill>\n  - [pid=29360] taskkill stderr: ERROR: The process \"29360\" not found.\n  - [pid=29360] <process did exit: exitCode=21, signal=null>\n  - [pid=29360] starting temporary directories cleanup\n  - [pid=29360] finished temporary directories cleanup\n  - [pid=29360] <gracefully close end>\n",
+    "status": "error",
+    "component": "linkedin_poster_workflow"
+  },
+  {
+    "timestamp": "2026-03-27T22:02:19.597832",
+    "action_type": "post_rejected",
+    "details": "User denied permission",
+    "status": "rejected",
+    "component": "linkedin_poster_workflow"
+  },
+  {
+    "timestamp": "2026-03-27T22:05:22.420249",
+    "action_type": "workflow_interrupted",
+    "details": "User cancelled",
+    "status": "cancelled",
+    "component": "linkedin_poster_workflow"
+  },
+  {
+    "timestamp": "2026-03-27T22:08:51.908201",
+    "action_type": "post_published",
+    "details": "Success - verified by user",
+    "status": "success",
+    "component": "linkedin_poster_workflow"
+  },
+  {
+    "timestamp": "2026-03-27T22:19:59.172113",
+    "action_type": "post_published",
+    "details": "Success - verified by user",
+    "status": "success",
+    "component": "linkedin_poster_workflow"
+  }
+]

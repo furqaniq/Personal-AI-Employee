@@ -67,11 +67,41 @@ class Orchestrator:
 
         # Track processed files to avoid duplicates
         self.processed_files: set = set()
-
+        
+        # Track sent emails to prevent duplicate sends
+        self.sent_emails_file = self.vault_path / '.creds' / 'sent_emails.json'
+        self.sent_emails = self._load_sent_emails()
+        
         # Credentials path for Email MCP
         self.credentials_path = Path.home() / 'AppData' / 'Local' / 'AI_Employee' / 'creds' / 'gmail' / 'client_secret.json'
 
         self.logger.info(f'Orchestrator initialized for vault: {vault_path}')
+    
+    def _load_sent_emails(self) -> set:
+        """Load list of sent email IDs."""
+        import json
+        if self.sent_emails_file.exists():
+            try:
+                data = json.loads(self.sent_emails_file.read_text(encoding='utf-8'))
+                return set(data.get('sent_ids', []))
+            except:
+                pass
+        return set()
+    
+    def _save_sent_email(self, email_id: str):
+        """Save sent email ID to prevent duplicate sends."""
+        import json
+        self.sent_emails.add(email_id)
+        # Keep only last 1000 sent emails
+        sent_list = list(self.sent_emails)[-1000:]
+        self.sent_emails_file.write_text(
+            json.dumps({'sent_ids': sent_list, 'updated': datetime.now().isoformat()}, indent=2),
+            encoding='utf-8'
+        )
+    
+    def _was_already_sent(self, email_id: str) -> bool:
+        """Check if email was already sent."""
+        return email_id in self.sent_emails
 
     def get_pending_items(self) -> List[Path]:
         """Get list of pending email action files."""
@@ -392,22 +422,59 @@ priority: {email_info.get('priority', 'medium')}
             self.logger.info(f'✓ Moved to Done: {item.name}')
 
     def process_approved_items(self):
-        """Process approved items - send emails."""
+        """Process approved items - send emails via MCP."""
         approved_items = self.get_approved_items()
         
         for item in approved_items:
             self.logger.info(f'Processing approved item: {item.name}')
             
+            # Check if file still exists (might have been processed by another instance)
+            if not item.exists():
+                self.logger.warning(f'File no longer exists (already processed?): {item.name}')
+                continue
+            
+            # Check if already sent (prevent duplicates)
+            if self._was_already_sent(item.name):
+                self.logger.info(f'✓ Email already sent (skipping): {item.name}')
+                # Move to Done since it was already sent
+                try:
+                    dest = self.done / item.name
+                    if dest.exists():
+                        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                        dest = self.done / f'{item.stem}_{timestamp}{item.suffix}'
+                    shutil.move(str(item), str(dest))
+                except:
+                    pass
+                continue
+            
             # Send email
             success = self.send_approved_email(item)
             
             if success:
+                # Mark as sent to prevent duplicates
+                self._save_sent_email(item.name)
+                
                 # Move to Done
-                dest = self.done / item.name
-                shutil.move(str(item), str(dest))
-                self.logger.info(f'✓ Moved to Done: {item.name}')
+                try:
+                    dest = self.done / item.name
+                    # Check if destination already exists
+                    if dest.exists():
+                        # Add timestamp to avoid conflict
+                        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                        dest = self.done / f'{item.stem}_{timestamp}{item.suffix}'
+                    
+                    shutil.move(str(item), str(dest))
+                    self.logger.info(f'✅ SUCCESS: Email sent and moved to Done: {dest.name}')
+                    self.logger.info('=' * 60)
+                except FileNotFoundError:
+                    # File was moved by another process - that's ok
+                    self.logger.info(f'✓ Email sent successfully (file already moved)')
+                except Exception as e:
+                    self.logger.error(f'Warning: Could not move file to Done: {e}')
+                    self.logger.info('✓ But email WAS sent successfully!')
             else:
-                self.logger.error(f'Failed to send email: {item.name}')
+                self.logger.error(f'✗ Failed to send email: {item.name}')
+                self.logger.info('File remains in Approved/ for retry')
 
     def update_dashboard(self, pending_count: int, approved_count: int, completed_count: int):
         """Update the Dashboard.md with current status."""

@@ -38,7 +38,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-# OAuth scopes
+# OAuth scopes - MUST INCLUDE gmail.send for sending emails
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 
